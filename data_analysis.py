@@ -4,12 +4,7 @@ import seaborn as sn
 import matplotlib.pyplot as plt
 import os
 train_A = pd.read_csv('train_A.csv')
-#print(train_A.columns)
-#
-#columns = train_A.sum()
-#print(train_A.sum())
-#for i in columns.keys():
-    #print(i)
+
 
 class Data_analysis:
     def __init__(self, data):
