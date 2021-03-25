@@ -34,7 +34,7 @@ class Data_analysis:
         print('The dimention of the image is:', original_example.shape)
         print('pixel mean: ', np.mean(original_example))
         print('pixel Standard Deviation: ', np.std(original_example))
-       # plt.figure(figsize=(12,4))
+        #plt.figure(figsize=(12,4))
         #plt.subplot(121)
         #plt.imshow(original_example, cmap= 'gray')
         #plt.show()        
@@ -46,7 +46,7 @@ class Data_analysis:
         plt.subplot(122)
         sn.distplot(original_example, kde=False)
         plt.xlabel('Pixel Intensity', fontsize=14)
-        plt.ylabel('# Pixels in Image', fontsize=14)
+        plt.ylabel('Pixels in Image', fontsize=14)
 
 
 
