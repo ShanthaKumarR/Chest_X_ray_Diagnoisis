@@ -47,10 +47,18 @@ class Data_analysis:
         sn.distplot(original_example, kde=False)
         plt.xlabel('Pixel Intensity', fontsize=14)
         plt.ylabel('Pixels in Image', fontsize=14)
+    def class_imblance_predection(self, clean_data):
+        print(clean_data.sum())
+        sn.barplot(clean_data.sum().values, clean_data.sum().index, color='g')
+        plt.title('Distribution of Classes for Training Dataset', fontsize=14)
+        plt.xlabel('Number of Patients', fontsize=14)
+        plt.ylabel('Diseases', fontsize=14)
+        plt.show()
 
 
 
 X = Data_analysis(train_A, image_dir = 'D:/material_science/rwa/AI-For-Medicine-Specialization-master/AI for Medical Diagnosis/Week 1/nih/images-small')
 y=X.data_insight()
-X.pixel_distrubution()
-X.image_visualization()
+#X.pixel_distrubution()
+#X.image_visualization()
+X.class_imblance_predection(y)
