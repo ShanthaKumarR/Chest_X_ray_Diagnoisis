@@ -4,7 +4,7 @@ import seaborn as sn
 import matplotlib.pyplot as plt
 import os
 
-train_A = pd.read_csv('train_A.csv')
+
 
 class Data_analysis:
     def __init__(self, data, image_dir):
@@ -57,8 +57,3 @@ class Data_analysis:
 
 
 
-X = Data_analysis(train_A, image_dir = 'D:/material_science/rwa/AI-For-Medicine-Specialization-master/AI for Medical Diagnosis/Week 1/nih/images-small')
-y=X.data_insight()
-#X.pixel_distrubution()
-#X.image_visualization()
-X.class_imblance_predection(y)
