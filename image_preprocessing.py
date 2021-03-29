@@ -7,22 +7,24 @@ import numpy as np
 
 
 class image_preprocessing:
-        def __init__(self,  original_example, image_dir, data, batch_size, target_w = 320, target_h = 320):
+        def __init__(self,  original_example, image_dir, data, labels, batch_size, target_w = 320, target_h = 320):
                 self.original_example=original_example
                 self.image_dir = image_dir
                 self.data = data
-                self.y_col = data.columns
                 self.batch_size = batch_size
                 self.target_w = target_w
                 self.target_h = target_h
-        
+                self.labels = labels
         def get_generator(self):
+                #y_col = self.y_col.remove('Image')
+                #y_col = self.y_col.remove('PatientId')
                 image_generator = ImageDataGenerator(samplewise_center=True, samplewise_std_normalization= True)
-                generator = image_generator.flow_from_dataframe(dataframe=self.data, directory=self.image_dir, x_col="Image", y_col=self.y_col, 
+                generator = image_generator.flow_from_dataframe(dataframe=self.data, directory=self.image_dir, x_col="Image", y_col=self.labels, 
                 class_mode="raw", 
                 batch_size= self.batch_size, 
                 shuffle=False,
                 target_size=(self.target_w, self.target_h))
+                print(generator.labels)
                 return generator
 
 

@@ -14,6 +14,8 @@ For the purpose of analysisng the dataset, module "data_analysis.py" is created.
 ## Data Preprocessing
 Normalize images : new mean of the data will be zero, and the standard deviation of the data will be 1. In other words each pixel value in the image with a new value calculated by subtracting the mean and dividing by the standard deviation.
 
+![Raw image] (./img/raw_image.png)
+
 
 ## Challanges in medical dataset
 

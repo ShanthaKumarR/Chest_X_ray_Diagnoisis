@@ -23,7 +23,26 @@ images = train['Image'].values
 images = np.random.choice(images)
 original_example = plt.imread(image_dir+'/'+images)
 
-X_2 = image_preprocessing(original_example = original_example, image_dir = image_dir, data =train, batch_size = 1, target_w = 320, target_h = 320)
-y_2 = X_2.get_generator()
-y_22 = X_2.Normalized_image(y_2)
-X_2.Compare_image(y_22)
+labels = list(train.keys())
+labels.remove('Image')
+labels.remove('PatientId')
+
+
+
+
+def main():
+    X_2 = image_preprocessing(original_example = original_example, image_dir = image_dir, data =train, labels = labels, batch_size = 1, target_w = 320, target_h = 320)
+    y_2 = X_2.get_generator()
+    y_22 = X_2.Normalized_image(y_2)
+    X_2.Compare_image(y_22)
+
+
+    values = np.mean(y_2.labels, axis=0)
+    sn.barplot(values, labels, order=labels)
+    plt.yticks(fontsize=13)
+    plt.title("Frequency of Each Class", fontsize=14)
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()
