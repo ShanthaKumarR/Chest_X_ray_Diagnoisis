@@ -6,36 +6,29 @@ import numpy as np
 
 
 
-train_A = pd.read_csv('train_A.csv')
-image_dir = 'D:/material_science/rwa/AI-For-Medicine-Specialization-master/AI for Medical Diagnosis/Week 1/nih/images-small'
-
-
-images = train_A['Image'].values
-images = np.random.choice(images)
-original_example = plt.imread(image_dir+'/'+images)
-
-#Normalize images : new mean of the data will be zero, and the standard deviation of the data will be 1.
-#In other words each pixel value in the image with a new value calculated by subtracting the mean and dividing by the standard deviation.
-image_generator = ImageDataGenerator(samplewise_center=True, samplewise_std_normalization= True)
-generator = image_generator.flow_from_dataframe(
-        dataframe=train_A,
-        directory=image_dir,
-        x_col="Image", 
-        y_col= ['Mass'], 
-        class_mode="raw", 
-        batch_size= 1, 
-        shuffle=False,
-        target_size=(320,320))
-
-
 class image_preprocessing:
-        def __init__(self, generator, original_example):
-                self.generator = generator
+        def __init__(self,  original_example, image_dir, data, batch_size, target_w = 320, target_h = 320):
                 self.original_example=original_example
+                self.image_dir = image_dir
+                self.data = data
+                self.y_col = data.columns
+                self.batch_size = batch_size
+                self.target_w = target_w
+                self.target_h = target_h
+        
+        def get_generator(self):
+                image_generator = ImageDataGenerator(samplewise_center=True, samplewise_std_normalization= True)
+                generator = image_generator.flow_from_dataframe(dataframe=self.data, directory=self.image_dir, x_col="Image", y_col=self.y_col, 
+                class_mode="raw", 
+                batch_size= self.batch_size, 
+                shuffle=False,
+                target_size=(self.target_w, self.target_h))
+                return generator
 
-        def Normalized_image(self):
+
+        def Normalized_image(self, generator):
                 sn.set_style("white")
-                generated_image, label = self.generator.__getitem__(0)
+                generated_image, label = generator.__getitem__(0)
                 plt.imshow(generated_image[0], cmap='gray')
                 plt.colorbar()
                 plt.title('Raw Chest X Ray Image')
@@ -48,9 +41,9 @@ class image_preprocessing:
         def Compare_image(self, generated_image):              
                 sn.set()
                 plt.figure(figsize=(10, 7))
-                sn.distplot(original_example.ravel(), 
-                        label=f'Original Image: mean {np.mean(original_example):.4f} - Standard Deviation {np.std(original_example):.4f} \n '
-                        f'Min pixel value {np.min(self.original_example):.4} - Max pixel value {np.max(original_example):.4}',
+                sn.distplot(self.original_example.ravel(), 
+                        label=f'Original Image: mean {np.mean(self.original_example):.4f} - Standard Deviation {np.std(self.original_example):.4f} \n '
+                        f'Min pixel value {np.min(self.original_example):.4} - Max pixel value {np.max(self.original_example):.4}',
                         color='blue', 
                         kde=False)
                 sn.distplot(generated_image[0].ravel(), 
@@ -64,6 +57,3 @@ class image_preprocessing:
                 plt.ylabel('# Pixel')
                 plt.show()
 
-X = image_preprocessing(generator, original_example)
-y = X.Normalized_image()
-X.Compare_image(generated_image =y)

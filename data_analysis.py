@@ -10,6 +10,7 @@ class Data_analysis:
     def __init__(self, data, image_dir):
         self.data = data  
         self.image_dir = image_dir  
+
     def data_insight(self):
         print('The first five records are: \n ', self.data.head(5))
         print('The colum attributes(labels) are: \n', self.data.columns)
@@ -17,6 +18,7 @@ class Data_analysis:
         print('No of unique patient Id is: \n', len(self.data['PatientId'].unique()))
         print(self.data.sum())
         return self.data.drop(['Image', 'PatientId'], 1, inplace=False)
+
     def image_visualization(self):
         images = self.data['Image'].values
         images = [np.random.choice(images) for i in range(9)]        
@@ -27,6 +29,7 @@ class Data_analysis:
             plt.imshow(img, cmap= 'gray')
             plt.axis('off')
         plt.show()
+
     def pixel_distrubution(self):
         images = self.data['Image'].values
         images = np.random.choice(images)
@@ -47,6 +50,7 @@ class Data_analysis:
         sn.distplot(original_example, kde=False)
         plt.xlabel('Pixel Intensity', fontsize=14)
         plt.ylabel('Pixels in Image', fontsize=14)
+
     def class_imblance_predection(self, clean_data):
         print(clean_data.sum())
         sn.barplot(clean_data.sum().values, clean_data.sum().index, color='g')
@@ -54,6 +58,21 @@ class Data_analysis:
         plt.xlabel('Number of Patients', fontsize=14)
         plt.ylabel('Diseases', fontsize=14)
         plt.show()
+
+    def data_leakage(self, dataset_two):
+        dataset_one_overlap = []
+        dataset_two_ovelap = []
+        dataset_one_ids = set(self.data.PatientId.values)
+        dataset_two_ids = set(dataset_two.PatientId.values)
+        overlap = list(dataset_one_ids.intersection(dataset_two_ids))
+        if overlap != 0:
+            print(f"There are {len(overlap)} datas are overlaping")
+            print(overlap)
+            for id in range(len(overlap)):
+                dataset_one_overlap.extend(self.data.index[self.data['PatientId'] ==  overlap[id]].tolist())
+                dataset_one_overlap.extend(dataset_two.index[dataset_two['PatientId'] ==  overlap[id]].tolist())
+        return dataset_one_overlap, dataset_two_ovelap
+
 
 
 
