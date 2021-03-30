@@ -15,9 +15,13 @@ class image_preprocessing:
                 self.target_w = target_w
                 self.target_h = target_h
                 self.labels = labels
+        def plot(self, img, title):
+                plt.imshow(img, cmap='gray')
+                plt.colorbar()
+                plt.title(title)
+                plt.show()
+
         def get_generator(self):
-                #y_col = self.y_col.remove('Image')
-                #y_col = self.y_col.remove('PatientId')
                 image_generator = ImageDataGenerator(samplewise_center=True, samplewise_std_normalization= True)
                 generator = image_generator.flow_from_dataframe(dataframe=self.data, directory=self.image_dir, x_col="Image", y_col=self.labels, 
                 class_mode="raw", 
@@ -28,20 +32,15 @@ class image_preprocessing:
 
 
         def Normalized_image(self, generator):
-                sn.set_style("white")
                 generated_image, label = generator.__getitem__(0)
-                plt.imshow(generated_image[0], cmap='gray')
-                plt.colorbar()
-                plt.title('Raw Chest X Ray Image')
+                self.plot(img = generated_image[0], title = 'Normalized Chest X Ray Image')
                 print(f"The dimensions of the image are {generated_image.shape[1]} pixels width and {generated_image.shape[2]} pixels height")
                 print(f"The maximum pixel value is {generated_image.max():.4f} and the minimum is {generated_image.min():.4f}")
                 print(f"The mean value of the pixels is {generated_image.mean():.4f} and the standard deviation is {generated_image.std():.4f}")
-                plt.show()
                 return generated_image
                 
         def Compare_image(self, generated_image):              
-                plt.imshow(self.original_example, cmap='gray')
-                plt.show()
+                self.plot(img =self.original_example, title = 'Raw Chest X Ray Image')
                 sn.set()
                 plt.figure(figsize=(10, 7))
                 sn.distplot(self.original_example.ravel(), 
@@ -59,4 +58,18 @@ class image_preprocessing:
                 plt.xlabel('Pixel Intensity')
                 plt.ylabel('# Pixel')
                 plt.show()
+        
+        def class_frequency_prediction(self, labels):
+                N = labels.shape[0]
+                #positive_frequencies = np.sum(labels, axis=0)/N
+                #negative_frequencies = 1. - positive_frequencies
+                #print(positive_frequencies)
+                #print(negative_frequencies)
+                positive_frequencies = np.sum(labels == 0, axis=0)/N
+                negative_frequencies = np.sum(labels == 1, axis=0)/N
+
+                return positive_frequencies, negative_frequencies
+
+
+
 
