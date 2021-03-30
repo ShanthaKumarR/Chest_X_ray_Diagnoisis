@@ -12,14 +12,19 @@ For the purpose of analysisng the dataset, module "data_analysis.py" is created.
 4. class_imblance_predection()
 
 ## Data Preprocessing
-Normalize images : new mean of the data will be zero, and the standard deviation of the data will be 1. In other words each pixel value in the image with a new value calculated by subtracting the mean and dividing by the standard deviation.
+
 
 <figure>
 <img src="img/raw_image.png" alt="drawing" >
-<figcaption> Single raw example from the dataset</figcaption>
+<figcaption> normalized image</figcaption>
 </figure>
+Normalize images : new mean of the data will be zero, and the standard deviation of the data will be 1. In other words each pixel value in the image with a new value calculated by subtracting the mean and dividing by the standard deviation.
 
 ## Challanges in medical dataset
+<figure>
+<img src="img/class_imbalance.png" alt="drawing" >
+<figcaption> class-imbalance</figcaption>
+</figure>
 
 ## Logistics regression cost function(Binary cross entropy) Vs Weight loss function 
 

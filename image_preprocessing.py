@@ -24,7 +24,6 @@ class image_preprocessing:
                 batch_size= self.batch_size, 
                 shuffle=False,
                 target_size=(self.target_w, self.target_h))
-                print(generator.labels)
                 return generator
 
 
@@ -41,6 +40,8 @@ class image_preprocessing:
                 return generated_image
                 
         def Compare_image(self, generated_image):              
+                plt.imshow(self.original_example, cmap='gray')
+                plt.show()
                 sn.set()
                 plt.figure(figsize=(10, 7))
                 sn.distplot(self.original_example.ravel(), 
