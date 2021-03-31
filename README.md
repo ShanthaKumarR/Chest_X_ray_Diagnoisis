@@ -1,6 +1,9 @@
 # Chest X-ray Diagnoisis
 In this project chest x-ray classification is presented.
-
+<figure>
+<img src="img/classes.png" alt="drawing" >
+<figcaption> normalized image</figcaption>
+</figure>
 ## Dataset
 108,948 frontal-view X-ray images of 32,717 unique patients.
 
@@ -21,10 +24,12 @@ For the purpose of analysisng the dataset, module "data_analysis.py" is created.
 Normalize images : new mean of the data will be zero, and the standard deviation of the data will be 1. In other words each pixel value in the image with a new value calculated by subtracting the mean and dividing by the standard deviation.
 
 ## Challanges in medical dataset
+## Class imbalance
 <figure>
 <img src="img/class_imbalance.png" alt="drawing" >
 <figcaption> class-imbalance</figcaption>
 </figure>
+
 
 ## Logistics regression cost function(Binary cross entropy) Vs Weight loss function 
 
