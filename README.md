@@ -1,7 +1,7 @@
 # Chest X-ray Diagnoisis
 In this project chest x-ray classification is presented.
 <figure>
-<img src="img/classes.png" alt="drawing" >
+<img src="img/classes.PNG" alt="drawing" >
 <figcaption> normalized image</figcaption>
 </figure>
 ## Dataset
