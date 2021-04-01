@@ -59,6 +59,7 @@ def main():
     X_2 = image_preprocessing(original_example = original_example, image_dir = train_image_dir, data =train, labels = label, batch_size = 10, target_w = 320, target_h = 320)
     train_generator= X_2.get_generator()
     y_true_train = train_generator.labels
+    
 
     
     X_3 = image_preprocessing(original_example = original_example, image_dir = val_image_dir, data = validation, labels = label, batch_size = 10, target_w = 320, target_h = 320)
@@ -84,9 +85,9 @@ def main():
     data = pd.DataFrame( {'Class': label, "Positive_freq":positive_frequencies, "Negative_freq":negative_frequencies, "Total_freq" :  positive_frequencies+negative_frequencies}  )
     data.plot.bar(x="Class", y=["Positive_freq", "Negative_freq",  "Total_freq"], figsize=(15,15), color=['Blue', 'Red', 'Yellow']);
     plt.yticks(fontsize=16); plt.xticks(fontsize=16, rotation=20); plt.legend(fontsize =16);
-    plt.show()
+    plt.show( )
 
-
+    print(len(y_true_val), len(y_true_train), len(y_true_test))
  
 if __name__ == "__main__":
     main()
