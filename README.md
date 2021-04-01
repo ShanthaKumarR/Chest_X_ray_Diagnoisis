@@ -4,6 +4,11 @@ In this project chest x-ray classification is presented.
 <img src="img/classes.PNG" alt="drawing" >
 <figcaption> normalized image</figcaption>
 </figure>
+
+Classes:
+- 1, Atelectasis; 2, Cardiomegaly; 3, Effusion; 4, Infiltration; 5, Mass; 6, Nodule; 7, Pneumonia; 8,
+Pneumothorax; 9, Consolidation; 10, Edema; 11, Emphysema; 12, Fibrosis; 13,
+Pleural_Thickening; 14 Hernia
 ## Dataset
 108,948 frontal-view X-ray images of 32,717 unique patients.
 
@@ -26,8 +31,8 @@ Normalize images : new mean of the data will be zero, and the standard deviation
 ## Challanges in medical dataset
 ## Class imbalance
 <figure>
-<img src="img/class_imbalance.png" alt="drawing" >
-<figcaption> class-imbalance</figcaption>
+<img src="img/class_freq.png" alt="drawing" >
+<figcaption> class frequency</figcaption>
 </figure>
 
 
@@ -35,7 +40,6 @@ Normalize images : new mean of the data will be zero, and the standard deviation
 
 ## Densnet
 
-## Acknowledgement 
-1. AI for medical (DeepLearning AI) 
-2. NIH clinical center 
+## Acknowledgement  
+1. NIH clinical center 
  

@@ -59,16 +59,8 @@ class image_preprocessing:
                 plt.ylabel('# Pixel')
                 plt.show()
         
-        def class_frequency_prediction(self, labels):
-                N = labels.shape[0]
-                #positive_frequencies = np.sum(labels, axis=0)/N
-                #negative_frequencies = 1. - positive_frequencies
-                #print(positive_frequencies)
-                #print(negative_frequencies)
-                positive_frequencies = np.sum(labels == 0, axis=0)/N
-                negative_frequencies = np.sum(labels == 1, axis=0)/N
+ 
 
-                return positive_frequencies, negative_frequencies
 
 
 
