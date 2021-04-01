@@ -35,6 +35,11 @@ Normalize images : new mean of the data will be zero, and the standard deviation
 <figcaption> class frequency</figcaption>
 </figure>
 
+<figure>
+<img src="img/pos_neg_freq.png" alt="drawing" >
+<figcaption> Positive and Negative frequency</figcaption>
+</figure>
+
 
 ## Logistics regression cost function(Binary cross entropy) Vs Weight loss function 
 
