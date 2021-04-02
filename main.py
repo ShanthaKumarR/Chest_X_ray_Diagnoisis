@@ -7,29 +7,32 @@ import matplotlib.pyplot as plt
 from keras.applications.densenet import DenseNet121
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras.models import Model, load_model
+#from keras import callbacks
 from keras import backend as K
+
 
 train = pd.read_csv('train.csv')
 test = pd.read_csv('test.csv')
 validation = pd.read_csv('val.csv')
 
 #sample image 
-train_image_dir = 'D:/material_science/x-ray_data/images'
-val_image_dir = 'D:/material_science/rwa/AI-For-Medicine-Specialization-master/AI for Medical Diagnosis/Week 1/nih/images-small'
+train_image_dir = '/content/gdrive/MyDrive/x_ray/train_image'
+val_image_dir = '/content/gdrive/MyDrive/x_ray/validation_image'
+test_image_dir = '/content/gdrive/MyDrive/x_ray/test_image'
 images = train['Image'].values
 images = np.random.choice(images)
 original_example = plt.imread(train_image_dir+'/'+images)
 
 def class_frequency_prediction(y_true):
         N = y_true.shape[0]
-        #positive_frequencies = np.sum(labels, axis=0)/N
-        #negative_frequencies = 1. - positive_frequencies
+        positive_frequencies = np.sum(y_true, axis=0)/N
+        negative_frequencies = 1. - positive_frequencies
         #print(positive_frequencies)
         #print(negative_frequencies)
-        positive_frequencies = np.sum(y_true == 0, axis=0)/N
-        negative_frequencies = np.sum(y_true == 1, axis=0)/N
-        weight_pos = negative_frequencies/N
-        weight_neg = positive_frequencies/N
+        #positive_frequencies = np.sum(y_true == 0, axis=0)/N
+        #negative_frequencies = np.sum(y_true == 1, axis=0)/N
+        weight_pos = negative_frequencies
+        weight_neg = positive_frequencies
         return positive_frequencies, negative_frequencies, weight_pos, weight_neg
 
 
@@ -37,10 +40,41 @@ def get_weighted_loss( pos_weights, neg_weights, epsilon=1e-7):
         def weighted_loss(y_true, y_pred):
                 loss = 0
                 for i in range(len(pos_weights)):
-                        loss += -(K.mean((pos_weights[i] * y_true[:,i] * K.log(y_pred[:,i] + epsilon)) + (neg_weights[i] * (1-y_true[:,i]) * K.log(1-y_pred[:,i] + epsilon)),axis = 0))
-                print(loss)
+                        loss_pos = -1 * K.mean(pos_weights[i] * y_true[:, i] * K.log(y_pred[:, i] + epsilon))
+                        loss_neg = -1 * K.mean(neg_weights[i] * (1 - y_true[:, i]) * K.log(1 - y_pred[:, i] + epsilon))
+                        loss += loss_pos + loss_neg
+                        #loss += -(K.mean((pos_weights[i] * y_true[:,i] * K.log(y_pred[:,i] + epsilon)) + (neg_weights[i] * (1-y_true[:,i]) * K.log(1-y_pred[:,i] + epsilon)),axis = 0))
+                #print(loss)
                 return loss
         return weighted_loss
+
+
+
+
+
+def build_lrfn(lr_start=0.000002, lr_max=0.00010, 
+               lr_min=0, lr_rampup_epochs=8, 
+               lr_sustain_epochs=0, lr_exp_decay=.8):
+
+    def lrfn(epoch):
+        if epoch < lr_rampup_epochs:
+            lr = (lr_max - lr_start) / lr_rampup_epochs * epoch + lr_start
+        elif epoch < lr_rampup_epochs + lr_sustain_epochs:
+            lr = lr_max
+        else:
+            lr = (lr_max - lr_min) *\
+                 lr_exp_decay**(epoch - lr_rampup_epochs\
+                                - lr_sustain_epochs) + lr_min
+        return lr
+    return lrfn
+
+lrfn = build_lrfn()
+lr_schedule = keras.callbacks.LearningRateScheduler(lrfn, verbose=True)
+
+
+
+
+
 
 def pretrained_model(labels, pos_weights, neg_weights):
     base_model = DenseNet121(include_top=False, weights="imagenet")
@@ -48,7 +82,7 @@ def pretrained_model(labels, pos_weights, neg_weights):
     x_pool = GlobalAveragePooling2D()(x)
     predictions = Dense(len(labels), activation="sigmoid")(x_pool)
     model = Model(inputs=base_model.input, outputs=predictions)
-    model.compile(optimizer='adam', loss=get_weighted_loss(pos_weights, neg_weights))
+    model.compile(optimizer='adam', loss=get_weighted_loss(pos_weights, neg_weights),  metrics = ['accuracy'])
     print(model.summary())
     return model
 
@@ -62,11 +96,11 @@ def main():
     val_data = Data_analysis(validation, image_dir = val_image_dir)
     val_df =val_data.data_insight()
 
-    test_data = Data_analysis(validation, image_dir = train_image_dir)
+    test_data = Data_analysis(test, image_dir = test_image_dir)
     test_df =test_data.data_insight()
     
     X_2 = image_preprocessing(original_example = original_example, image_dir = train_image_dir, train_df =train_df, 
-    valid_df =val_df, test_df= test_df, labels = label,  batch_size = 10, val_dir = val_image_dir, test_dir=train_image_dir, target_w = 320, target_h = 320)
+    valid_df =val_df, test_df= test_df, labels = label,  batch_size = 64, val_dir = val_image_dir, test_dir=test_image_dir, target_w = 320, target_h = 320)
     train_generator= X_2.get_train_generator()
     y_true_train = train_generator.labels
     
@@ -94,8 +128,8 @@ def main():
     history = model.fit_generator(train_generator, 
                               validation_data=val_generator,
                               steps_per_epoch= len(train_generator), 
-                              validation_steps=len(val_generator), 
-                              epochs = 30)
+                              validation_steps=(val_generator), 
+                              epochs = 20, callbacks=[lr_schedule])
     #print(len(y_true_val), len(y_true_train), len(y_true_test))
     # summarize history for loss
     plt.plot(history.history['loss'])
@@ -104,6 +138,7 @@ def main():
     plt.ylabel('loss')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
+    plt.savefig('plot.png')
     plt.show()
     model.save_weights("model.h5")
     predicted_vals = model.predict_generator(test_generator, steps = len(test_generator))
