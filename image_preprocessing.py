@@ -7,29 +7,65 @@ import numpy as np
 
 
 class image_preprocessing:
-        def __init__(self,  original_example, image_dir, data, labels, batch_size, target_w = 320, target_h = 320):
+        def __init__(self,  original_example, image_dir, train_df, valid_df, test_df, labels,
+        batch_size, val_dir, test_dir, target_w = 320, target_h = 320):
                 self.original_example=original_example
                 self.image_dir = image_dir
-                self.data = data
+                self.train_df = train_df
                 self.batch_size = batch_size
                 self.target_w = target_w
                 self.target_h = target_h
                 self.labels = labels
+                self.valid_df = valid_df
+                self.val_dir = val_dir
+                self.test_df = test_df
+                self.test_dir = test_dir
         def plot(self, img, title):
                 plt.imshow(img, cmap='gray')
                 plt.colorbar()
                 plt.title(title)
                 plt.show()
 
-        def get_generator(self):
+        def get_train_generator(self):
                 image_generator = ImageDataGenerator(samplewise_center=True, samplewise_std_normalization= True)
-                generator = image_generator.flow_from_dataframe(dataframe=self.data, directory=self.image_dir, x_col="Image", y_col=self.labels, 
+                generator = image_generator.flow_from_dataframe(dataframe=self.train_df, directory=self.image_dir, x_col="Image", y_col=self.labels, 
                 class_mode="raw", 
                 batch_size= self.batch_size, 
                 shuffle=False,
                 target_size=(self.target_w, self.target_h))
                 return generator
 
+        def get_test_val_generator(self):
+                #raw_train_generator = ImageDataGenerator(samplewise_center=True, samplewise_std_normalization= True)
+                raw_train_generator = ImageDataGenerator().flow_from_dataframe(dataframe=self.train_df, directory=self.image_dir, x_col="Image", y_col=self.labels, 
+                class_mode="raw", 
+                batch_size= self.batch_size, 
+                shuffle=False,
+                target_size=(self.target_w, self.target_h))
+
+                batch = raw_train_generator.next()
+                data_sample = batch[0]
+
+                image_generator = ImageDataGenerator(featurewise_center=True, featurewise_std_normalization= True)
+                image_generator.fit(data_sample)
+
+                valid_generator = image_generator.flow_from_dataframe(dataframe= self.valid_df, directory=self.val_dir, x_col="Image",
+                y_col=self.labels,
+                class_mode="raw",
+                batch_size=self.batch_size,
+                shuffle=False,
+                seed=1,
+                target_size=(self.target_w, self.target_h))
+
+                test_generator = image_generator.flow_from_dataframe(dataframe=self.test_df, directory=self.test_dir, x_col="Image",
+                y_col=self.labels,
+                class_mode="raw",
+                batch_size=self.batch_size,
+                shuffle=False,
+                seed=1,
+                target_size=(self.target_w, self.target_h))
+
+                return valid_generator, test_generator
 
         def Normalized_image(self, generator):
                 generated_image, label = generator.__getitem__(0)

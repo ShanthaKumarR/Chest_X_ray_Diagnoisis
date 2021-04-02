@@ -17,8 +17,9 @@ class Data_analysis:
         print('The null value check: \n', self.data.info())
         print('No of unique patient Id is: \n', len(self.data['PatientID'].unique()))
         print(self.data.sum())
-        return self.data.drop(['Image', 'PatientID'], 1, inplace=False)
-
+        train = self.data.drop(['PatientID'], 1, inplace=False)
+        #labels = self.data.drop(['Image'], 1, inplace=False).columns
+        return train
     def image_visualization(self):
         images = self.data['Image'].values
         images = [np.random.choice(images) for i in range(9)]        

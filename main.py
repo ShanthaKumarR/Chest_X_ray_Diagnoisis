@@ -42,39 +42,42 @@ def get_weighted_loss( pos_weights, neg_weights, epsilon=1e-7):
                 return loss
         return weighted_loss
 
-def pretrained_model(y_true, pos_weights, neg_weights):
+def pretrained_model(labels, pos_weights, neg_weights):
     base_model = DenseNet121(include_top=False, weights="imagenet")
     x = base_model.output
     x_pool = GlobalAveragePooling2D()(x)
-    predictions = Dense(len(y_true), activation="sigmoid")(x_pool)
+    predictions = Dense(len(labels), activation="sigmoid")(x_pool)
     model = Model(inputs=base_model.input, outputs=predictions)
     model.compile(optimizer='adam', loss=get_weighted_loss(pos_weights, neg_weights))
+    print(model.summary())
     return model
 
 
 def main():
     train_data = Data_analysis(train, image_dir = train_image_dir)
-    label=train_data.data_insight().columns
+    train_data.data_leakage(validation)
+    train_df =train_data.data_insight()
+    label = train_df.drop(['Image'], 1, inplace=False).columns
+    
+    val_data = Data_analysis(validation, image_dir = val_image_dir)
+    val_df =val_data.data_insight()
 
-    X_2 = image_preprocessing(original_example = original_example, image_dir = train_image_dir, data =train, labels = label, batch_size = 10, target_w = 320, target_h = 320)
-    train_generator= X_2.get_generator()
+    test_data = Data_analysis(validation, image_dir = train_image_dir)
+    test_df =test_data.data_insight()
+    
+    X_2 = image_preprocessing(original_example = original_example, image_dir = train_image_dir, train_df =train_df, 
+    valid_df =val_df, test_df= test_df, labels = label,  batch_size = 10, val_dir = val_image_dir, test_dir=train_image_dir, target_w = 320, target_h = 320)
+    train_generator= X_2.get_train_generator()
     y_true_train = train_generator.labels
     
-
-    
-    X_3 = image_preprocessing(original_example = original_example, image_dir = val_image_dir, data = validation, labels = label, batch_size = 10, target_w = 320, target_h = 320)
-    val_generator= X_3.get_generator()
+    val_generator, test_generator = X_2.get_test_val_generator()    
     y_true_val = val_generator.labels
-
-    X_4 = image_preprocessing(original_example = original_example, image_dir = train_image_dir, data = test, labels = label, batch_size = 10, target_w = 320, target_h = 320)
-    test_generator= X_4.get_generator()
     y_true_test = test_generator.labels
 
     positive_frequencies, negative_frequencies, w_p, w_n = class_frequency_prediction(y_true_train)
-    model = pretrained_model(y_true = y_true_train, pos_weights = w_p, neg_weights=w_n)  
+      
     
     
-    train_data.data_leakage(validation)
     
     values = np.mean(y_true_train, axis=0)
     sn.barplot(values, label, order=label)
@@ -87,8 +90,26 @@ def main():
     plt.yticks(fontsize=16); plt.xticks(fontsize=16, rotation=20); plt.legend(fontsize =16);
     plt.show( )
 
-    print(len(y_true_val), len(y_true_train), len(y_true_test))
- 
+    model = pretrained_model(labels = label, pos_weights = w_p, neg_weights=w_n)
+    history = model.fit_generator(train_generator, 
+                              validation_data=val_generator,
+                              steps_per_epoch= len(train_generator), 
+                              validation_steps=len(val_generator), 
+                              epochs = 30)
+    #print(len(y_true_val), len(y_true_train), len(y_true_test))
+    # summarize history for loss
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper left')
+    plt.show()
+    model.save_weights("model.h5")
+    predicted_vals = model.predict_generator(test_generator, steps = len(test_generator))
+    print(predicted_vals)
+
+        
 if __name__ == "__main__":
     main()
     
