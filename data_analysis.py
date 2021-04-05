@@ -74,12 +74,7 @@ class Data_analysis:
                 dataset_one_overlap.extend(dataset_two.index[dataset_two['PatientID'] ==  overlap[id]].tolist())
         return dataset_one_overlap, dataset_two_ovelap
 
-    
-    def bar_plot(self):
-        plt.figure(figsize=(15,4))
-        sn.barplot(x="Class", y="Value", hue="Label" ,data=data);
-        plt.xticks(rotation=90);
-        plt.yticks(fontsize=16); plt.xticks(fontsize=16); plt.legend(fontsize =16);
+
 
 
 

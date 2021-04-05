@@ -7,15 +7,18 @@ import matplotlib.pyplot as plt
 import keras 
 from keras.applications.densenet import DenseNet121
 from keras.layers import Dense, GlobalAveragePooling2D
-from keras.models import Model, load_model
+from keras.models import Model, load_model, Sequential
 from tensorflow.keras.callbacks import LearningRateScheduler
 from keras import backend as K
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, LearningRateScheduler
-
-
+from Evaluvation import get_roc_curve
+import efficientnet.keras as efn
+import tensorflow as tf
+import tensorflow.keras.layers as L
 train = pd.read_csv('train.csv')
 test = pd.read_csv('test.csv')
 validation = pd.read_csv('val.csv')
+
 
 #sample image 
 train_image_dir = 'D:/material_science/x-ray_data/images'
@@ -73,8 +76,8 @@ def build_lrfn(lr_start=0.000002, lr_max=0.00010,
 lrfn = build_lrfn()
 
 lr_schedule = LearningRateScheduler(lrfn, verbose=True)
-checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-early_stop = EarlyStopping(monitor='val_loss', patience=3, verbose=1)
+#checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+#early_stop = EarlyStopping(monitor='val_loss', patience=3, verbose=1)
 
 
 
@@ -82,11 +85,25 @@ early_stop = EarlyStopping(monitor='val_loss', patience=3, verbose=1)
 
 def pretrained_model(labels, pos_weights, neg_weights):
     base_model = DenseNet121(include_top=False, weights="imagenet")
+    '''model = Sequential([
+        efn.EfficientNetB1(
+            input_shape=(128,128, 3),
+            weights='imagenet',
+            include_top=False),
+        GlobalAveragePooling2D(),
+        Dense(1024, activation = 'relu'), 
+        Dense(len(labels), activation='sigmoid')
+    ])'''
+    #base_model = efn.EfficientNetB1(weights='imagenet', include_top=False)  
     x = base_model.output
     x_pool = GlobalAveragePooling2D()(x)
+    #dense_layer = Dense(1024, activation = 'relu')(x_pool)
     predictions = Dense(len(labels), activation="sigmoid")(x_pool)
     model = Model(inputs=base_model.input, outputs=predictions)
-    model.compile(optimizer='adam', loss=get_weighted_loss(pos_weights, neg_weights),  metrics = ['accuracy'])
+    #model.compile(optimizer='adam', loss=get_weighted_loss(pos_weights, neg_weights),  metrics = ['accuracy'])
+    model.compile(optimizer=keras.optimizers.Adam( learning_rate=1e-4, amsgrad=False),
+      loss = get_weighted_loss(pos_weights, neg_weights),
+      metrics = ['accuracy'])
     print(model.summary())
     return model
 
@@ -126,29 +143,32 @@ def main():
     data = pd.DataFrame( {'Class': label, "Positive_freq":positive_frequencies, "Negative_freq":negative_frequencies, "Total_freq" :  positive_frequencies+negative_frequencies}  )
     data.plot.bar(x="Class", y=["Positive_freq", "Negative_freq",  "Total_freq"], figsize=(15,15), color=['Blue', 'Red', 'Yellow']);
     plt.yticks(fontsize=16); plt.xticks(fontsize=16, rotation=20); plt.legend(fontsize =16);
-    plt.show( )
+    plt.show()
 
     model = pretrained_model(labels = label, pos_weights = w_p, neg_weights=w_n)
-    history = model.fit_generator(train_generator, 
+    #model.load_weights('efficent_net_b1_trained_weights.h5')
+    model.load_weights('D:/material_science/pretrained_model.h5')
+    '''history = model.fit_generator(train_generator, 
                               validation_data=val_generator,
                               steps_per_epoch= 1, 
                               validation_steps=1, 
-                              epochs = 20, callbacks=[lr_schedule, checkpoint, EarlyStopping])
+                              epochs = 20, callbacks=[lr_schedule, checkpoint, EarlyStopping])'''
     #print(len(y_true_val), len(y_true_train), len(y_true_test))
     # summarize history for loss
-    plt.plot(history.history['loss'])
-    plt.plot(history.history['val_loss'])
-    plt.title('model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper left')
-    plt.savefig('plot.png')
-    plt.show()
-    model.save_weights("model.h5")
+    #plt.plot(history.history['loss'])
+    #plt.plot(history.history['val_loss'])
+    #plt.title('model loss')
+    #plt.ylabel('loss')
+    #plt.xlabel('epoch')
+    #plt.legend(['train', 'test'], loc='upper left')
+    #plt.savefig('plot.png')
+    #plt.show()
+    #model.save_weights("model.h5")
+   
+    #print(predicted_vals)
+    #model.load_weights("xray_class_weights.best.hdf5")
     predicted_vals = model.predict_generator(test_generator, steps = len(test_generator))
-    print(predicted_vals)
-
-        
+    auc_rocs = get_roc_curve(label, predicted_vals, test_generator)
 if __name__ == "__main__":
     main()
     
