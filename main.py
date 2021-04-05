@@ -4,11 +4,13 @@ from image_preprocessing import image_preprocessing
 import numpy as np
 import seaborn as sn 
 import matplotlib.pyplot as plt
+import keras 
 from keras.applications.densenet import DenseNet121
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras.models import Model, load_model
-#from keras import callbacks
+from tensorflow.keras.callbacks import LearningRateScheduler
 from keras import backend as K
+from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, LearningRateScheduler
 
 
 train = pd.read_csv('train.csv')
@@ -16,9 +18,9 @@ test = pd.read_csv('test.csv')
 validation = pd.read_csv('val.csv')
 
 #sample image 
-train_image_dir = '/content/gdrive/MyDrive/x_ray/train_image'
-val_image_dir = '/content/gdrive/MyDrive/x_ray/validation_image'
-test_image_dir = '/content/gdrive/MyDrive/x_ray/test_image'
+train_image_dir = 'D:/material_science/x-ray_data/images'
+val_image_dir = 'D:/material_science/rwa/AI-For-Medicine-Specialization-master/AI for Medical Diagnosis/Week 1/nih/images-small'
+test_image_dir = 'D:/material_science/x-ray_data/val_image'
 images = train['Image'].values
 images = np.random.choice(images)
 original_example = plt.imread(train_image_dir+'/'+images)
@@ -69,8 +71,10 @@ def build_lrfn(lr_start=0.000002, lr_max=0.00010,
     return lrfn
 
 lrfn = build_lrfn()
-lr_schedule = keras.callbacks.LearningRateScheduler(lrfn, verbose=True)
 
+lr_schedule = LearningRateScheduler(lrfn, verbose=True)
+checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+early_stop = EarlyStopping(monitor='val_loss', patience=3, verbose=1)
 
 
 
@@ -100,7 +104,7 @@ def main():
     test_df =test_data.data_insight()
     
     X_2 = image_preprocessing(original_example = original_example, image_dir = train_image_dir, train_df =train_df, 
-    valid_df =val_df, test_df= test_df, labels = label,  batch_size = 64, val_dir = val_image_dir, test_dir=test_image_dir, target_w = 320, target_h = 320)
+    valid_df =val_df, test_df= test_df, labels = label,  batch_size = 10, val_dir = val_image_dir, test_dir=test_image_dir, target_w = 320, target_h = 320)
     train_generator= X_2.get_train_generator()
     y_true_train = train_generator.labels
     
@@ -127,9 +131,9 @@ def main():
     model = pretrained_model(labels = label, pos_weights = w_p, neg_weights=w_n)
     history = model.fit_generator(train_generator, 
                               validation_data=val_generator,
-                              steps_per_epoch= len(train_generator), 
-                              validation_steps=(val_generator), 
-                              epochs = 20, callbacks=[lr_schedule])
+                              steps_per_epoch= 1, 
+                              validation_steps=1, 
+                              epochs = 20, callbacks=[lr_schedule, checkpoint, EarlyStopping])
     #print(len(y_true_val), len(y_true_train), len(y_true_test))
     # summarize history for loss
     plt.plot(history.history['loss'])

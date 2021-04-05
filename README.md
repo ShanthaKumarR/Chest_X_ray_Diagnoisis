@@ -13,9 +13,9 @@ Pleural_Thickening; 14 Hernia
 original dataset contains - 108,948 frontal-view X-ray images of 32,717 unique patients.
 
 But we are using only 10,000 image for the training, tesing and validating. 
-Training images - 8000 
-validation images - 1400
-Testing images - 2000
+Training images - 8000, 
+validation images - 1400,
+Testing images - 2000.
 ## Data analysis(EDA)
 For the purpose of analysisng the dataset, module "data_analysis.py" is created. This module has a class Data_analysis. The methods associated to that class are 
 1. data_insight()

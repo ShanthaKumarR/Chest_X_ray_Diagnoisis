@@ -31,3 +31,72 @@ y_pred_2 = (0.3*np.ones(y_true.shape))
 obj_1 = Densenet_Model(label = y_true, epsilon = 1)
 loss = obj_1.weighted_loss(y_predicted = y_pred_1, weight_pos = w_p, weight_neg=w_n)
 loss_2 = obj_1.weighted_loss(y_predicted = y_pred_2, weight_pos = w_p, weight_neg=w_n)'''
+
+
+class Generators:
+    """
+    Train, validation and test generators
+    """
+    def __init__(self, train_df, test_df):
+        self.batch_size=32
+        self.img_size=(64,64)
+        
+        # Base train/validation generator
+        _datagen = ImageDataGenerator(
+            rescale=1./255.,
+            validation_split=0.25,
+            featurewise_center=False,
+            featurewise_std_normalization=False,
+            rotation_range=90,
+            width_shift_range=0.2,
+            height_shift_range=0.2,
+            horizontal_flip=True,
+            vertical_flip=True
+            )
+        # Train generator
+        self.train_generator = _datagen.flow_from_dataframe(
+            dataframe=train_df,
+            directory="../input/train/",
+            x_col="id",
+            y_col="label",
+            has_ext=False,
+            subset="training",
+            batch_size=self.batch_size,
+            seed=42,
+            shuffle=True,
+            class_mode="categorical",
+            target_size=self.img_size)
+        print('Train generator created')
+        # Validation generator
+        self.val_generator = _datagen.flow_from_dataframe(
+            dataframe=train_df,
+            directory="../input/train/",
+            x_col="id",
+            y_col="label",
+            has_ext=False,
+            subset="validation",
+            batch_size=self.batch_size,
+            seed=42,
+            shuffle=True,
+            class_mode="categorical",
+            target_size=self.img_size)    
+        print('Validation generator created')
+        # Test generator
+        _test_datagen=ImageDataGenerator(rescale=1./255.)
+        self.test_generator = _test_datagen.flow_from_dataframe(
+            dataframe=test_df,
+            directory="../input/train/",
+            x_col="id",
+            y_col='label',
+            has_ext=False,
+            class_mode="categorical",
+            batch_size=self.batch_size,
+            seed=42,
+            shuffle=False,
+            target_size=self.img_size)     
+        print('Test generator created')
+
+        
+# Create generators        
+generators = Generators(train_df, test_df)
+print("Generators created")
