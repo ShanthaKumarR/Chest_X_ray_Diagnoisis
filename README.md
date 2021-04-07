@@ -18,10 +18,12 @@ validation images - 1400,
 Testing images - 2000.
 ## Data analysis(EDA)
 For the purpose of analysisng the dataset, module "data_analysis.py" is created. This module has a class Data_analysis. The methods associated to that class are 
-1. data_insight()
+1. data_insight() 
 2. image_visualization()
 3. pixel_distrubution()
 4. class_imblance_predection()
+5. data_leakage()
+
 
 ## Data Preprocessing
 
@@ -48,6 +50,24 @@ Normalize images : new mean of the data will be zero, and the standard deviation
 ## Logistics regression cost function(Binary cross entropy) Vs Weight loss function 
 
 ## Densnet
+## Model Evaluvation 7
+<figure>
+<img src="img/val_freq.png" alt="drawing" >
+<figcaption> Class frequency in validation set</figcaption>
+</figure>
+
+## Roc curve 
+<figure>
+<img src="img/roc_val.png" alt="drawing" >
+<figcaption> Roc curve</figcaption>
+</figure>
+
+<figure>
+<img src="img/prec_recal.png" alt="drawing" >
+<figcaption> Precision-Recall Curve</figcaption>
+</figure>
+
+## Metrics (True Positives, False Positives, True Negatives, and False Negatives)
 
 ## Acknowledgement  
 1. NIH clinical center 

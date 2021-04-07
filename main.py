@@ -11,19 +11,21 @@ from keras.models import Model, load_model, Sequential
 from tensorflow.keras.callbacks import LearningRateScheduler
 from keras import backend as K
 from keras.callbacks import ModelCheckpoint, EarlyStopping, CSVLogger, LearningRateScheduler
-from Evaluvation import get_roc_curve
+from util import get_roc_curve, compute_gradcam
 import efficientnet.keras as efn
 import tensorflow as tf
 import tensorflow.keras.layers as L
-train = pd.read_csv('train.csv')
+
+
+train = pd.read_csv('train-small.csv')
 test = pd.read_csv('test.csv')
-validation = pd.read_csv('val.csv')
+validation = pd.read_csv('valid-small.csv')
 
 
 #sample image 
-train_image_dir = 'D:/material_science/x-ray_data/images'
+train_image_dir = 'D:/material_science/rwa/AI-For-Medicine-Specialization-master/AI for Medical Diagnosis/Week 1/nih/images-small'
 val_image_dir = 'D:/material_science/rwa/AI-For-Medicine-Specialization-master/AI for Medical Diagnosis/Week 1/nih/images-small'
-test_image_dir = 'D:/material_science/x-ray_data/val_image'
+test_image_dir = 'D:/material_science/rwa/AI-For-Medicine-Specialization-master/AI for Medical Diagnosis/Week 1/nih/images-small'
 images = train['Image'].values
 images = np.random.choice(images)
 original_example = plt.imread(train_image_dir+'/'+images)
@@ -164,11 +166,14 @@ def main():
     #plt.savefig('plot.png')
     #plt.show()
     #model.save_weights("model.h5")
+
    
-    #print(predicted_vals)
-    #model.load_weights("xray_class_weights.best.hdf5")
     predicted_vals = model.predict_generator(test_generator, steps = len(test_generator))
+    df = pd.DataFrame(data=predicted_vals)
+    df.to_csv('predections.csv')
     auc_rocs = get_roc_curve(label, predicted_vals, test_generator)
+    #labels_to_show = np.take(labels, np.argsort(auc_rocs)[::-1])[:4]
+    #compute_gradcam(model, '00008270_015.png', test_image_dir, test, labels, labels_to_show)
 if __name__ == "__main__":
     main()
     

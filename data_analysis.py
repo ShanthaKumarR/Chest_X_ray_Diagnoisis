@@ -15,9 +15,9 @@ class Data_analysis:
         print('The first five records are: \n ', self.data.head(5))
         print('The colum attributes(labels) are: \n', self.data.columns)
         print('The null value check: \n', self.data.info())
-        print('No of unique patient Id is: \n', len(self.data['PatientID'].unique()))
+        print('No of unique patient Id is: \n', len(self.data['PatientId'].unique()))
         print(self.data.sum())
-        train = self.data.drop(['PatientID'], 1, inplace=False)
+        train = self.data.drop(['PatientId'], 1, inplace=False)
         #labels = self.data.drop(['Image'], 1, inplace=False).columns
         return train
     def image_visualization(self):
@@ -63,16 +63,16 @@ class Data_analysis:
     def data_leakage(self, dataset_two):
         dataset_one_overlap = []
         dataset_two_ovelap = []
-        dataset_one_ids = set(self.data.PatientID.values)
-        dataset_two_ids = set(dataset_two.PatientID.values)
+        dataset_one_ids = set(self.data.PatientId.values)
+        dataset_two_ids = set(dataset_two.PatientId.values)
         overlap = list(dataset_one_ids.intersection(dataset_two_ids))
         if overlap != 0:
             print(f"There are {len(overlap)} datas are overlaping")
             print(overlap)
             for id in range(len(overlap)):
-                dataset_one_overlap.extend(self.data.index[self.data['PatientID'] ==  overlap[id]].tolist())
-                dataset_one_overlap.extend(dataset_two.index[dataset_two['PatientID'] ==  overlap[id]].tolist())
-        return dataset_one_overlap, dataset_two_ovelap
+                dataset_one_overlap.extend(self.data.index[self.data['PatientId'] ==  overlap[id]].tolist())
+                dataset_one_overlap.extend(dataset_two.index[dataset_two['PatientId'] ==  overlap[id]].tolist())
+        return dataset_two.drop(dataset_two_ovelap)
 
 
 
